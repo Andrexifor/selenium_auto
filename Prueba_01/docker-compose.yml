@@ -1,0 +1,24 @@
+services:
+
+  chrome:
+    image: selenium/standalone-chrome:latest
+    ports:
+      - "4444:4444"
+      - "7900:7900"
+    shm_size: "2gb"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4444/wd/hub/status || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  selenium-app:
+    build: .
+    depends_on:
+      chrome:
+        condition: service_healthy   # 👈 espera que Chrome pase el healthcheck
+    environment:
+      - SELENIUM_URL=http://chrome:4444
+    volumes:
+      - ./resultados:/app/resultados
